@@ -1,284 +1,243 @@
+<!-- App.vue -->
 <template>
-  <div class="typing-container">
-    <!-- Список уроков слева -->
-    <nav class="lesson-nav">
-      <h3>Уроки</h3>
-      <ul>
-        <li><router-link to="/lesson/1">Урок 1</router-link></li>
-        <li><router-link to="/lesson/2">Урок 2</router-link></li>
-        <li><router-link to="/lesson/3">Урок 3</router-link></li>
-        <li><router-link to="/lesson/4">Урок 4</router-link></li>
-        <li><router-link to="/lesson/5">Урок 5</router-link></li>
-      </ul>
-    </nav>
+  <div class="typing-trainer">
+    <h1>Тренажер слепой печати</h1>
+    
+    <div class="stats">
+      <span>Скорость: {{ wpm }} слов/мин</span>
+      <span>Точность: {{ accuracy }}%</span>
+      <span>Время: {{ timer }}с</span>
+    </div>
 
-    <!-- Основной контент -->
-    <div class="typing-area">
-      <p class="sample-text" v-html="highlightedText"></p>
+    <div v-if="!isCompleted" class="text-container">
+      <div class="text-to-type">
+        <span 
+          v-for="(char, index) in currentText" 
+          :key="index" 
+          :class="{
+            'current': index === currentPosition,
+            'correct': typedText[index] === char && index < currentPosition,
+            'incorrect': typedText[index] !== char && typedText[index] && index < currentPosition
+          }"
+        >
+          {{ char }}
+        </span>
+      </div>
+    </div>
 
-      <!-- Поле ввода или результат -->
-      <div v-if="!isFinished">
-        <textarea
-          v-model="userInput"
-          @input="checkInput"
-          placeholder="Начинайте печатать здесь..."
-          :disabled="isStarted === false && startTime === null"
-          class="input-field"
-        ></textarea>
-        <p class="start-text">Нажмите, чтобы начать</p>
-        <button @click="toggleTyping" :disabled="isFinished">
-          {{ isStarted ? "Отменить" : "Начать" }}
-        </button>
-      </div>
-      <div v-else class="results">
-        <h2>Поздравляю, урок {{ currentLesson }} закончен!</h2>
-        <div class="stats">
-          <p>Количество знаков: {{ stats.characters }}</p>
-          <p>Ошибки: {{ stats.errors }}</p>
-          <p>Точность: {{ stats.accuracy }}%</p>
-          <p>Скорость: {{ stats.cpm }} зн/мин</p>
-          <p>Время: {{ stats.time }} сек</p>
-        </div>
-        <div v-if="currentLesson < 5">
-          <router-link :to="`/lesson/${currentLesson + 1}`">
-            <button>Приступить к уроку {{ currentLesson + 1 }}</button>
-          </router-link>
-        </div>
-        <div v-else>
-          <p class="completed-text">Вы прошли все уроки, скоро мы добавим новые!</p>
-        </div>
-      </div>
+    <div v-if="isCompleted" class="completion-message">
+      Поздравляю, вы прошли урок!
+    </div>
+
+    <textarea
+      v-model="userInput"
+      @input="handleInput"
+      @keydown="handleKeyDown"
+      ref="input"
+      class="typing-input"
+      placeholder="Начинайте печатать здесь..."
+      :disabled="!isStarted || isCompleted"
+    ></textarea>
+
+    <div class="controls">
+      <button @click="startPractice" v-if="!isStarted && !isCompleted">Начать</button>
+      <button @click="reset" v-if="isStarted && !isCompleted">Сбросить</button>
+      <button @click="restart" v-if="isCompleted">Начать заново</button>
+      <button @click="nextLesson" v-if="isCompleted">Следующий урок</button>
     </div>
   </div>
 </template>
 
 <script>
 export default {
+  name: 'TypingTrainer',
   data() {
     return {
-      lessons: {
-        1: [
-          "Привет, это пример текста для слепой печати.",
-          "Быстрая коричневая лисица прыгает через ленивую собаку.",
-        ],
-        2: [
-          "Солнце светит ярко над зелёными полями.",
-          "Дети играют в парке с разноцветными мячами.",
-        ],
-        3: [
-          "Осень раскрасила лес в золотые и красные тона.",
-          "Река тихо течёт среди высоких гор.",
-        ],
-        4: [
-          "Котёнок спит на мягком коврике у окна.",
-          "Птицы поют весёлые песни на ветках.",
-        ],
-        5: [
-          "Зима покрыла землю белым пушистым снегом.",
-          "Люди катались на санках с высокой горки.",
-        ],
-      },
+      textLines: [
+        'привет мир как дела у тебя сегодня',
+        'сегодня хороший день для практики'
+      ],
       currentLineIndex: 0,
-      sampleText: "",
-      userInput: "",
-      startTime: null,
-      endTime: null,
+      userInput: '',
+      currentPosition: 0,
       isStarted: false,
-      isFinished: false,
-      totalErrors: 0,
-      stats: {
-        characters: 0,
-        errors: 0,
-        accuracy: 0,
-        cpm: 0,
-        time: 0,
-      },
-    };
+      isCompleted: false,
+      startTime: null,
+      timer: 0,
+      correctChars: 0,
+      totalChars: 0,
+      timerInterval: null
+    }
   },
   computed: {
-    currentLesson() {
-      return parseInt(this.$route.params.lessonId) || 1;
+    currentText() {
+      return this.textLines[this.currentLineIndex]
     },
-    textLines() {
-      return this.lessons[this.currentLesson] || this.lessons[1];
+    wpm() {
+      if (!this.startTime || this.timer === 0) return 0
+      const minutes = this.timer / 60
+      const words = this.correctChars / 5
+      return Math.round(words / minutes) || 0
     },
-    highlightedText() {
-      const sample = this.sampleText;
-      const input = this.userInput;
-      let result = "";
-      for (let i = 0; i < sample.length; i++) {
-        if (i < input.length) {
-          result +=
-            input[i] === sample[i]
-              ? `<span>${sample[i]}</span>`
-              : `<span class="error">${sample[i]}</span>`;
-        } else {
-          result += `<span>${sample[i]}</span>`;
-        }
-      }
-      return result;
+    accuracy() {
+      if (this.totalChars === 0) return 100
+      return Math.round((this.correctChars / this.totalChars) * 100)
     },
-  },
-  watch: {
-    "$route"(to) {
-      this.resetLesson(to.params.lessonId);
-    },
-  },
-  mounted() {
-    this.resetLesson(this.$route.params.lessonId);
+    typedText() {
+      return this.userInput.split('')
+    }
   },
   methods: {
-    resetLesson(lessonId) {
-      const lesson = parseInt(lessonId) || 1;
-      this.currentLineIndex = 0;
-      this.sampleText = this.lessons[lesson][this.currentLineIndex];
-      this.userInput = "";
-      this.totalErrors = 0;
-      this.isStarted = false;
-      this.isFinished = false;
-      this.startTime = null;
-      this.endTime = null;
+    startPractice() {
+      this.isStarted = true
+      this.startTime = Date.now()
+      this.startTimer()
+      this.$nextTick(() => {
+        this.$refs.input.focus()
+      })
     },
-    toggleTyping() {
-      if (!this.isStarted) {
-        this.userInput = "";
-        this.totalErrors = 0;
-        this.isStarted = true;
-        this.isFinished = false;
-        this.startTime = new Date();
+    handleInput() {
+      this.totalChars = this.userInput.length
+      
+      if (this.userInput[this.currentPosition] === this.currentText[this.currentPosition]) {
+        this.correctChars++
+      }
+      
+      this.currentPosition = this.userInput.length
+      
+      if (this.currentPosition >= this.currentText.length) {
+        this.moveToNextLine()
+      }
+    },
+    handleKeyDown(event) {
+      if (!this.isStarted || this.isCompleted) {
+        event.preventDefault()
+        return
+      }
+    },
+    startTimer() {
+      this.timerInterval = setInterval(() => {
+        this.timer = Math.floor((Date.now() - this.startTime) / 1000)
+      }, 1000)
+    },
+    moveToNextLine() {
+      if (this.currentLineIndex + 1 < this.textLines.length) {
+        this.currentLineIndex++
+        this.userInput = ''
+        this.currentPosition = 0
       } else {
-        this.resetLesson(this.currentLesson); // Просто сбрасываем урок
+        this.isStarted = false
+        this.isCompleted = true
+        clearInterval(this.timerInterval)
       }
     },
-    checkInput() {
-      if (!this.isStarted) return;
-
-      const sample = this.sampleText;
-      const input = this.userInput;
-
-      // Подсчёт ошибок
-      for (let i = 0; i < input.length; i++) {
-        if (input[i] !== sample[i]) {
-          if (input.length > sample.slice(0, input.length).lastIndexOf(input[i])) {
-            this.totalErrors++;
-          }
-          break;
-        }
-      }
-
-      // Переход к следующей строке или завершение
-      if (input === sample) {
-        this.currentLineIndex++;
-        if (this.currentLineIndex < this.textLines.length) {
-          this.sampleText = this.textLines[this.currentLineIndex];
-          this.userInput = "";
-        } else {
-          this.isFinished = true;
-          this.isStarted = false;
-          this.endTime = new Date();
-          this.calculateStats();
-        }
-      }
+    reset() {
+      this.isStarted = false
+      this.userInput = ''
+      this.currentPosition = 0
+      this.startTime = null
+      this.timer = 0
+      this.correctChars = 0
+      this.totalChars = 0
+      clearInterval(this.timerInterval)
     },
-    calculateStats() {
-      const timeDiff = (this.endTime - this.startTime) / 1000; // Время в секундах
-      const totalChars = this.textLines.join("").length;
-      const minutes = timeDiff / 60;
-
-      this.stats.characters = totalChars;
-      this.stats.errors = this.totalErrors;
-      this.stats.accuracy = Math.round(((totalChars - this.totalErrors) / totalChars) * 100);
-      this.stats.cpm = Math.round(totalChars / minutes);
-      this.stats.time = Math.round(timeDiff);
+    restart() {
+      this.reset()
+      this.isCompleted = false
+      this.currentLineIndex = 0
     },
+    nextLesson() {
+      // Здесь можно добавить логику перехода к следующему уроку
+      alert('Следующий урок пока не реализован')
+      this.restart()
+    }
   },
-};
+  beforeUnmount() {
+    clearInterval(this.timerInterval)
+  }
+}
 </script>
 
 <style scoped>
-.typing-container {
-  display: flex;
-  max-width: 1200px;
-  margin: 20px auto;
-}
-
-.lesson-nav {
-  width: 200px;
+.typing-trainer {
+  max-width: 800px;
+  margin: 0 auto;
   padding: 20px;
-  border-right: 1px solid #ccc;
+  font-family: Arial, sans-serif;
 }
 
-.lesson-nav ul {
-  list-style: none;
-  padding: 0;
+.stats {
+  margin: 20px 0;
+  display: flex;
+  gap: 20px;
 }
 
-.lesson-nav a {
-  text-decoration: none;
-  color: #007bff;
+.text-container {
+  background: #f0f0f0;
+  padding: 20px;
+  border-radius: 5px;
+  margin: 20px 0;
+  font-size: 24px;
+  font-family: monospace;
 }
 
-.lesson-nav a:hover {
+.text-to-type span {
+  transition: all 0.1s;
+}
+
+.current {
+  background: #ffff99;
+}
+
+.correct {
+  color: #2ecc71;
+}
+
+.incorrect {
+  color: #e74c3c;
   text-decoration: underline;
 }
 
-.typing-area {
-  flex: 1;
-  padding: 20px;
-  text-align: center;
-}
-
-.sample-text {
-  font-size: 18px;
-  margin-bottom: 20px;
-  color: #333;
-}
-
-.sample-text .error {
-  color: #ff4081; /* Розовый цвет для ошибок */
-  font-weight: bold;
-}
-
-.input-field {
-  width: 400px;
-  height: 100px;
-  font-size: 16px;
+.typing-input {
+  width: 100%;
+  min-height: 100px;
   padding: 10px;
-  border: 1px solid #ccc;
+  font-size: 16px;
+  margin: 20px 0;
+  border: 1px solid #ddd;
   border-radius: 5px;
-  resize: none;
+  resize: vertical;
+  font-family: monospace;
 }
 
-.start-text {
-  font-size: 14px;
-  color: #666;
-  margin: 10px 0;
+.typing-input:disabled {
+  background: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
 }
 
 button {
-  margin-top: 10px;
   padding: 10px 20px;
   font-size: 16px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
 }
 
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+button:hover {
+  background: #2980b9;
 }
 
-.results h2 {
-  color: #28a745;
-  margin-bottom: 20px;
-}
-
-.stats p {
-  margin: 5px 0;
-}
-
-.completed-text {
-  color: #ff4081;
-  font-size: 18px;
-  margin-top: 20px;
+.completion-message {
+  font-size: 24px;
+  color: #2ecc71;
+  text-align: center;
+  margin: 20px 0;
 }
 </style>
