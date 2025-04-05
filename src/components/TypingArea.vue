@@ -1,4 +1,3 @@
-<!-- App.vue -->
 <template>
   <div class="typing-trainer">
     <h1>Тренажер слепой печати</h1>
@@ -9,7 +8,7 @@
       <span>Время: {{ timer }}с</span>
     </div>
 
-    <div v-if="!isCompleted" class="text-container">
+    <div v-if="!isCompleted" class="text-container" @keydown="handleKeyDown">
       <div class="text-to-type">
         <span 
           v-for="(char, index) in currentText" 
@@ -28,16 +27,6 @@
     <div v-if="isCompleted" class="completion-message">
       Поздравляю, вы прошли урок!
     </div>
-
-    <textarea
-      v-model="userInput"
-      @input="handleInput"
-      @keydown="handleKeyDown"
-      ref="input"
-      class="typing-input"
-      placeholder="Начинайте печатать здесь..."
-      :disabled="!isStarted || isCompleted"
-    ></textarea>
 
     <div class="controls">
       <button @click="startPractice" v-if="!isStarted && !isCompleted">Начать</button>
@@ -58,7 +47,7 @@ export default {
         'сегодня хороший день для практики'
       ],
       currentLineIndex: 0,
-      userInput: '',
+      typedText: [],
       currentPosition: 0,
       isStarted: false,
       isCompleted: false,
@@ -82,9 +71,6 @@ export default {
     accuracy() {
       if (this.totalChars === 0) return 100
       return Math.round((this.correctChars / this.totalChars) * 100)
-    },
-    typedText() {
-      return this.userInput.split('')
     }
   },
   methods: {
@@ -93,26 +79,37 @@ export default {
       this.startTime = Date.now()
       this.startTimer()
       this.$nextTick(() => {
-        this.$refs.input.focus()
+        this.$el.querySelector('.text-container').focus()
       })
-    },
-    handleInput() {
-      this.totalChars = this.userInput.length
-      
-      if (this.userInput[this.currentPosition] === this.currentText[this.currentPosition]) {
-        this.correctChars++
-      }
-      
-      this.currentPosition = this.userInput.length
-      
-      if (this.currentPosition >= this.currentText.length) {
-        this.moveToNextLine()
-      }
     },
     handleKeyDown(event) {
       if (!this.isStarted || this.isCompleted) {
         event.preventDefault()
         return
+      }
+
+      const key = event.key
+      if (key.length === 1) { // Обрабатываем только одиночные символы
+        this.totalChars++
+        const currentChar = this.currentText[this.currentPosition]
+        
+        if (key === currentChar) {
+          this.correctChars++
+        }
+        
+        this.typedText[this.currentPosition] = key
+        this.currentPosition++
+        
+        if (this.currentPosition >= this.currentText.length) {
+          this.moveToNextLine()
+        }
+      } else if (key === 'Backspace' && this.currentPosition > 0) {
+        this.currentPosition--
+        this.typedText[this.currentPosition] = undefined
+        this.totalChars--
+        if (this.typedText[this.currentPosition] === this.currentText[this.currentPosition]) {
+          this.correctChars--
+        }
       }
     },
     startTimer() {
@@ -123,7 +120,7 @@ export default {
     moveToNextLine() {
       if (this.currentLineIndex + 1 < this.textLines.length) {
         this.currentLineIndex++
-        this.userInput = ''
+        this.typedText = []
         this.currentPosition = 0
       } else {
         this.isStarted = false
@@ -133,7 +130,7 @@ export default {
     },
     reset() {
       this.isStarted = false
-      this.userInput = ''
+      this.typedText = []
       this.currentPosition = 0
       this.startTime = null
       this.timer = 0
@@ -147,10 +144,12 @@ export default {
       this.currentLineIndex = 0
     },
     nextLesson() {
-      // Здесь можно добавить логику перехода к следующему уроку
       alert('Следующий урок пока не реализован')
       this.restart()
     }
+  },
+  mounted() {
+    this.$el.querySelector('.text-container').setAttribute('tabindex', '0')
   },
   beforeUnmount() {
     clearInterval(this.timerInterval)
@@ -179,6 +178,7 @@ export default {
   margin: 20px 0;
   font-size: 24px;
   font-family: monospace;
+  outline: none;
 }
 
 .text-to-type span {
@@ -196,23 +196,6 @@ export default {
 .incorrect {
   color: #e74c3c;
   text-decoration: underline;
-}
-
-.typing-input {
-  width: 100%;
-  min-height: 100px;
-  padding: 10px;
-  font-size: 16px;
-  margin: 20px 0;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  resize: vertical;
-  font-family: monospace;
-}
-
-.typing-input:disabled {
-  background: #f0f0f0;
-  cursor: not-allowed;
 }
 
 .controls {
