@@ -1,6 +1,6 @@
 <template>
   <div class="typing-trainer">
-    <h1>Тренажер слепой печати</h1>
+    <Header />
     
     <div class="stats">
       <span>Скорость: {{ wpm }} слов/мин</span>
@@ -8,7 +8,7 @@
       <span>Время: {{ timer }}с</span>
     </div>
 
-    <div v-if="!isCompleted" class="text-container" @keydown="handleKeyDown">
+    <div v-if="!isCompleted" ref="textContainer" class="text-container" @keydown="handleKeyDown" tabindex="0">
       <div class="text-to-type">
         <span 
           v-for="(char, index) in currentText" 
@@ -38,8 +38,13 @@
 </template>
 
 <script>
+import Header from './partials/Header.vue'
+
 export default {
   name: 'TypingTrainer',
+  components: {
+    Header
+  },
   data() {
     return {
       textLines: [
@@ -79,17 +84,25 @@ export default {
       this.startTime = Date.now()
       this.startTimer()
       this.$nextTick(() => {
-        this.$el.querySelector('.text-container').focus()
+        if (this.$refs.textContainer) {
+          this.$refs.textContainer.focus()
+        }
       })
     },
     handleKeyDown(event) {
-      if (!this.isStarted || this.isCompleted) {
+      if (this.isCompleted) {
         event.preventDefault()
         return
       }
+      
+      if (!this.isStarted) {
+        this.isStarted = true
+        this.startTime = Date.now()
+        this.startTimer()
+      }
 
       const key = event.key
-      if (key.length === 1) { // Обрабатываем только одиночные символы
+      if (key.length === 1) {
         this.totalChars++
         const currentChar = this.currentText[this.currentPosition]
         
@@ -142,15 +155,25 @@ export default {
       this.reset()
       this.isCompleted = false
       this.currentLineIndex = 0
+      
+      setTimeout(() => {
+        this.isStarted = true
+        this.startTime = Date.now()
+        this.startTimer()
+        
+        this.$nextTick(() => {
+          if (this.$refs.textContainer) {
+            this.$refs.textContainer.focus()
+          }
+        })
+      }, 50)
     },
     nextLesson() {
       alert('Следующий урок пока не реализован')
       this.restart()
     }
   },
-  mounted() {
-    this.$el.querySelector('.text-container').setAttribute('tabindex', '0')
-  },
+  mounted() {},
   beforeUnmount() {
     clearInterval(this.timerInterval)
   }
