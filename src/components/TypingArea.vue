@@ -162,7 +162,7 @@ export default {
   max-width: 980px;
   margin: 0 auto;
   padding: 20px;
-  font-family: Arial, sans-serif;
+  font-family: "Noto Sans", sans-serif;
 }
 
 .stats {
