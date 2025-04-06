@@ -159,7 +159,7 @@ export default {
 
 <style scoped>
 .typing-trainer {
-  max-width: 800px;
+  max-width: 980px;
   margin: 0 auto;
   padding: 20px;
   font-family: Arial, sans-serif;
@@ -172,7 +172,7 @@ export default {
 }
 
 .text-container {
-  background: #f0f0f0;
+  background: rgba(255, 255, 255, 0.2);
   padding: 20px;
   border-radius: 5px;
   margin: 20px 0;
@@ -186,15 +186,15 @@ export default {
 }
 
 .current {
-  background: #ffff99;
+  background: #646464;
 }
 
 .correct {
-  color: #2ecc71;
+  color: #3CB371;
 }
 
 .incorrect {
-  color: #e74c3c;
+  color: #CD5C5C;
   text-decoration: underline;
 }
 
