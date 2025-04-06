@@ -29,21 +29,23 @@
     </div>
 
     <div class="controls">
-      <button @click="startPractice" v-if="!isStarted && !isCompleted">Начать</button>
-      <button @click="reset" v-if="isStarted && !isCompleted">Сбросить</button>
-      <button @click="restart" v-if="isCompleted">Начать заново</button>
-      <button @click="nextLesson" v-if="isCompleted">Следующий урок</button>
+      <CustomButton @click="startPractice" v-if="!isStarted && !isCompleted" color="green">Начать</CustomButton>
+      <CustomButton @click="reset" v-if="isStarted && !isCompleted" color="red">Сбросить</CustomButton>
+      <CustomButton @click="restart" v-if="isCompleted">Начать заново</CustomButton>
+      <CustomButton @click="nextLesson" v-if="isCompleted" color="green">Следующий урок</CustomButton>
     </div>
   </div>
 </template>
 
 <script>
 import Header from './partials/Header.vue'
+import CustomButton from './partials/CustomButton.vue'
 
 export default {
   name: 'TypingTrainer',
   components: {
-    Header
+    Header,
+    CustomButton
   },
   data() {
     return {
