@@ -268,7 +268,7 @@ export default {
 
 .levels-sidebar a {
   text-decoration: none;
-  color: #333;
+  color: #6a6a6a;
   display: block;
   padding: 8px;
   border-radius: 4px;
@@ -279,8 +279,9 @@ export default {
 }
 
 .levels-sidebar a.active {
-  background: #3498db;
+  background: rgba(76, 175, 80, .5);
   color: white;
+  outline: none;
 }
 
 .main-content {
