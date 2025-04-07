@@ -1,7 +1,20 @@
 <template>
-  <h1>Footer</h1>
+  <div class="wrapper">
+    {{ currentYear }} © by ilya krapivnoy
+    <GitHubButton />
+  </div>
 </template>
 
-<script setup></script>
+<script setup>
+import GitHubButton from "./GitHubButton.vue";
 
-<style scoped></style>
+const currentYear = new Date().getFullYear();
+</script>
+
+<style scoped>
+.wrapper {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+</style>
