@@ -1,7 +1,5 @@
 <template>
   <div class="typing-trainer">
-    <Header />
-
     <div class="container">
       <div class="levels-sidebar">
         <h3>Уровни</h3>
@@ -87,13 +85,11 @@
 </template>
 
 <script>
-import Header from "./partials/Header.vue";
 import CustomButton from "./partials/CustomButton.vue";
 
 export default {
   name: "TypingArea",
   components: {
-    Header,
     CustomButton,
   },
   data() {
