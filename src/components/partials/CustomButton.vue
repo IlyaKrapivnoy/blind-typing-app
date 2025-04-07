@@ -1,11 +1,5 @@
 <template>
-  <button 
-    :class="[
-      'custom-button',
-      `color-${color}`
-    ]"
-    @click="$emit('click')"
-  >
+  <button :class="['custom-button', `color-${color}`]" @click="$emit('click')">
     <slot></slot>
   </button>
 </template>
@@ -14,12 +8,12 @@
 const props = defineProps({
   color: {
     type: String,
-    default: 'white',
-    validator: (value) => ['white', 'red', 'green'].includes(value)
-  }
+    default: "white",
+    validator: (value) => ["white", "red", "green"].includes(value),
+  },
 });
 
-defineEmits(['click']);
+defineEmits(["click"]);
 </script>
 
 <style scoped>
@@ -46,7 +40,7 @@ defineEmits(['click']);
 
 .color-red {
   border-color: rgba(255, 82, 82, 0.6);
-  color:rgba(255, 82, 82, 0.6);
+  color: rgba(255, 82, 82, 0.6);
 }
 
 .color-green {
