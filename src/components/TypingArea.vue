@@ -12,7 +12,7 @@
               :class="{ active: currentLevelId === level.id }"
               @click="changeLevel(level.id)"
             >
-              Уровень {{ level.id }}
+              {{ level.id }}
             </router-link>
           </li>
         </ul>
@@ -75,12 +75,29 @@ export default {
     Header,
     CustomButton
   },
-  data() {
+  data() { 
     return {
       levels: [
         { id: 1, text: ['привет, мир!', 'как дела сегодня?'] },
         { id: 2, text: ['сегодня хороший день', 'для практики набора'] },
         { id: 3, text: ['быстрая лиса', 'прыгнула через забор'] },
+        { id: 4, text: ['скорый поезд', 'перешагнул через рельсы'] },
+        { id: 5, text: ['дождь в ноябре', 'успокаивает лучше чая из шиповника'] },
+        { id: 6, text: ['нора для зайца', 'небо для воробья'] },
+        { id: 7, text: ['солнце над лесом', 'утренний свет в окне'] },
+        { id: 8, text: ['котёнок на крыше', 'смотрит на звёзды ночью'] },
+        { id: 9, text: ['река течёт медленно', 'трава шепчет на ветру'] },
+        { id: 10, text: ['снег покрыл поля', 'зима пришла незаметно'] },
+        { id: 11, text: ['птицы поют весной', 'цветы раскрывают лепестки'] },
+        { id: 12, text: ['луна освещает путь', 'сова охотится в тишине'] },
+        { id: 13, text: ['горы стоят веками', 'облака плывут над ними'] },
+        { id: 14, text: ['книга на столе ждёт', 'чай остывает в кружке'] },
+        { id: 15, text: ['дети играют в парке', 'смех разносится повсюду'] },
+        { id: 16, text: ['старик шёл по тропе', 'воспоминания грели душу'] },
+        { id: 17, text: ['море шумит вдали', 'волны целуют берег'] },
+        { id: 18, text: ['закат красит небо', 'вечер обещает покой'] },
+        { id: 19, text: ['утро в деревне', 'запах свежескошенной травы'] },
+        { id: 20, text: ['звёзды над озером', 'тишина обнимает ночь'] },
       ],
       typedText: [],
       currentPosition: 0,
@@ -247,7 +264,7 @@ export default {
 }
 
 .levels-sidebar {
-  width: 200px;
+  width: 190px;
   background: rgba(255, 255, 255, 0.1);
   padding: 15px;
   border-radius: 5px;
@@ -255,23 +272,36 @@ export default {
 
 .levels-sidebar h3 {
   margin: 0 0 15px 0;
+  font-weight: 600;
+  color: #fff;
 }
 
 .levels-sidebar ul {
   list-style: none;
   padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  outline: none;
 }
 
 .levels-sidebar li {
-  margin-bottom: 10px;
+  flex: 0 0 calc(25% - 10px);
+  margin: 0;
 }
 
 .levels-sidebar a {
   text-decoration: none;
-  color: #6a6a6a;
-  display: block;
-  padding: 8px;
+  color: #a0a0a0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
+  font-size: 16px;
+  transition: background 0.3s;
 }
 
 .levels-sidebar a:hover {
@@ -279,7 +309,7 @@ export default {
 }
 
 .levels-sidebar a.active {
-  background: rgba(76, 175, 80, .5);
+  background: rgba(76, 175, 80, 0.5);
   color: white;
   outline: none;
 }

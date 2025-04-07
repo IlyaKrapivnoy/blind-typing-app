@@ -24,7 +24,8 @@ defineEmits(['click']);
 
 <style scoped>
 .custom-button {
-  padding: 6px 30px;
+  min-width: 170px;
+  padding: 6px 10px;
   font-size: 16px;
   background: rgba(255, 255, 255, 0.1);
   color: white;
@@ -36,7 +37,6 @@ defineEmits(['click']);
 
 .custom-button:hover {
   background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
 }
 
 .color-white {
