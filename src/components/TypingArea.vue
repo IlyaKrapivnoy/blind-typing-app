@@ -2,37 +2,65 @@
   <div class="typing-trainer">
     <Header />
     
-    <div class="stats">
-      <span>Скорость: {{ wpm }} слов/мин</span>
-      <span>Точность: {{ accuracy }}%</span>
-      <span>Время: {{ timer }}с</span>
-    </div>
-
-    <div v-if="!isCompleted" ref="textContainer" class="text-container" @keydown="handleKeyDown" tabindex="0">
-      <div class="text-to-type">
-        <span 
-          v-for="(char, index) in currentText" 
-          :key="index" 
-          :class="{
-            'current': index === currentPosition,
-            'correct': typedText[index] === char && index < currentPosition,
-            'incorrect': typedText[index] !== char && typedText[index] && index < currentPosition
-          }"
-        >
-          {{ char }}
-        </span>
+    <div class="container">
+      <div class="levels-sidebar">
+        <h3>Уровни</h3>
+        <ul>
+          <li v-for="level in levels" :key="level.id">
+            <router-link 
+              :to="`/level/${level.id}`" 
+              :class="{ active: currentLevelId === level.id }"
+              @click="changeLevel(level.id)"
+            >
+              Уровень {{ level.id }}
+            </router-link>
+          </li>
+        </ul>
       </div>
-    </div>
 
-    <div v-if="isCompleted" class="completion-message">
-      Поздравляю, вы прошли урок!
-    </div>
+      <div class="main-content">
+        <div class="stats">
+          <span>Скорость: {{ wpm }} слов/мин</span>
+          <span>Точность: {{ accuracy }}%</span>
+          <span>Время: {{ timer }}с</span>
+        </div>
 
-    <div class="controls">
-      <CustomButton @click="startPractice" v-if="!isStarted && !isCompleted" color="green">Начать</CustomButton>
-      <CustomButton @click="reset" v-if="isStarted && !isCompleted" color="red">Сбросить</CustomButton>
-      <CustomButton @click="restart" v-if="isCompleted">Начать заново</CustomButton>
-      <CustomButton @click="nextLesson" v-if="isCompleted" color="green">Следующий урок</CustomButton>
+        <div v-if="!isCompleted" ref="textContainer" class="text-container" @keydown="handleKeyDown" tabindex="0">
+          <div class="text-to-type">
+            <span 
+              v-for="(char, index) in currentText" 
+              :key="index" 
+              :class="{
+                'current': index === currentPosition,
+                'correct': typedText[index] === char && index < currentPosition,
+                'incorrect': typedText[index] !== char && typedText[index] && index < currentPosition
+              }"
+            >
+              {{ char }}
+            </span>
+          </div>
+        </div>
+
+        <div v-if="isCompleted" class="completion-message">
+          Поздравляю, вы прошли уровень {{ currentLevelId }}!
+          <div v-if="isLastLevel" class="coming-soon">
+            Скоро появятся новые уровни!
+          </div>
+        </div>
+
+        <div class="controls">
+          <CustomButton @click="startPractice" v-if="!isStarted && !isCompleted" color="green">Начать</CustomButton>
+          <CustomButton @click="reset" v-if="isStarted && !isCompleted" color="red">Сбросить</CustomButton>
+          <CustomButton @click="restart" v-if="isCompleted">Начать заново</CustomButton>
+          <CustomButton 
+            @click="nextLesson" 
+            v-if="isCompleted && !isLastLevel" 
+            color="green"
+          >
+            Следующий уровень
+          </CustomButton>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -42,20 +70,21 @@ import Header from './partials/Header.vue'
 import CustomButton from './partials/CustomButton.vue'
 
 export default {
-  name: 'TypingTrainer',
+  name: 'TypingArea',
   components: {
     Header,
     CustomButton
   },
   data() {
     return {
-      textLines: [
-        'привет мир как дела у тебя сегодня',
-        'сегодня хороший день для практики'
+      levels: [
+        { id: 1, text: ['привет, мир!', 'как дела сегодня?'] },
+        { id: 2, text: ['сегодня хороший день', 'для практики набора'] },
+        { id: 3, text: ['быстрая лиса', 'прыгнула через забор'] },
       ],
-      currentLineIndex: 0,
       typedText: [],
       currentPosition: 0,
+      currentLineIndex: 0,
       isStarted: false,
       isCompleted: false,
       startTime: null,
@@ -66,8 +95,17 @@ export default {
     }
   },
   computed: {
+    currentLevelId() {
+      return parseInt(this.$route.params.lessonId) || 1
+    },
+    currentLevel() {
+      return this.levels.find(level => level.id === this.currentLevelId) || this.levels[0]
+    },
     currentText() {
-      return this.textLines[this.currentLineIndex]
+      return this.currentLevel.text[this.currentLineIndex]
+    },
+    isLastLevel() {
+      return this.currentLevelId === this.levels.length
     },
     wpm() {
       if (!this.startTime || this.timer === 0) return 0
@@ -98,9 +136,7 @@ export default {
       }
       
       if (!this.isStarted) {
-        this.isStarted = true
-        this.startTime = Date.now()
-        this.startTimer()
+        this.startPractice()
       }
 
       const key = event.key
@@ -128,12 +164,13 @@ export default {
       }
     },
     startTimer() {
+      if (this.timerInterval) clearInterval(this.timerInterval)
       this.timerInterval = setInterval(() => {
         this.timer = Math.floor((Date.now() - this.startTime) / 1000)
       }, 1000)
     },
     moveToNextLine() {
-      if (this.currentLineIndex + 1 < this.textLines.length) {
+      if (this.currentLineIndex + 1 < this.currentLevel.text.length) {
         this.currentLineIndex++
         this.typedText = []
         this.currentPosition = 0
@@ -145,8 +182,10 @@ export default {
     },
     reset() {
       this.isStarted = false
+      this.isCompleted = false
       this.typedText = []
       this.currentPosition = 0
+      this.currentLineIndex = 0
       this.startTime = null
       this.timer = 0
       this.correctChars = 0
@@ -155,27 +194,39 @@ export default {
     },
     restart() {
       this.reset()
-      this.isCompleted = false
-      this.currentLineIndex = 0
-      
-      setTimeout(() => {
-        this.isStarted = true
-        this.startTime = Date.now()
-        this.startTimer()
-        
-        this.$nextTick(() => {
-          if (this.$refs.textContainer) {
-            this.$refs.textContainer.focus()
-          }
-        })
-      }, 50)
+      this.$nextTick(() => {
+        this.startPractice()
+      })
     },
     nextLesson() {
-      alert('Следующий урок пока не реализован')
-      this.restart()
+      const nextLevelId = this.currentLevelId + 1
+      if (nextLevelId <= this.levels.length) {
+        this.$router.push(`/level/${nextLevelId}`).then(() => {
+          this.reset()
+        }).catch(err => {
+          console.error('Navigation error:', err)
+        })
+      }
+    },
+    changeLevel(levelId) {
+      this.$router.push(`/level/${levelId}`).then(() => {
+        this.reset()
+      }).catch(err => {
+        console.error('Navigation error:', err)
+      })
     }
   },
-  mounted() {},
+  watch: {
+    '$route.params.lessonId': {
+      immediate: true,
+      handler(newVal) {
+        const levelId = parseInt(newVal) || 1
+        if (this.levels.some(level => level.id === levelId)) {
+          this.reset()
+        }
+      }
+    }
+  },
   beforeUnmount() {
     clearInterval(this.timerInterval)
   }
@@ -184,10 +235,56 @@ export default {
 
 <style scoped>
 .typing-trainer {
-  max-width: 980px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   font-family: "Noto Sans", sans-serif;
+}
+
+.container {
+  display: flex;
+  gap: 20px;
+}
+
+.levels-sidebar {
+  width: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 5px;
+}
+
+.levels-sidebar h3 {
+  margin: 0 0 15px 0;
+}
+
+.levels-sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.levels-sidebar li {
+  margin-bottom: 10px;
+}
+
+.levels-sidebar a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.levels-sidebar a:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.levels-sidebar a.active {
+  background: #3498db;
+  color: white;
+}
+
+.main-content {
+  flex: 1;
 }
 
 .stats {
@@ -228,24 +325,16 @@ export default {
   gap: 10px;
 }
 
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background: #3498db;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #2980b9;
-}
-
 .completion-message {
   font-size: 24px;
   color: #2ecc71;
   text-align: center;
   margin: 20px 0;
+}
+
+.coming-soon {
+  font-size: 18px;
+  color: #3498db;
+  margin-top: 10px;
 }
 </style>
