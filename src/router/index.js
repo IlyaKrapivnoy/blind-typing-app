@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import TypingArea from "../components/TypingArea.vue";
 
 const routes = [
-  { path: "/level/:lessonId", component: TypingArea },
+  { path: "/level/:levelId", component: TypingArea },
   { path: "/", redirect: "/level/1" },
 ];
 
