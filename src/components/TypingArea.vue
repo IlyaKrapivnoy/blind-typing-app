@@ -137,7 +137,7 @@ export default {
   },
   computed: {
     currentLevelId() {
-      return parseInt(this.$route.params.lessonId) || 1;
+      return parseInt(this.$route.params.levelId) || 1;
     },
     currentLevel() {
       return (
@@ -270,7 +270,7 @@ export default {
     },
   },
   watch: {
-    "$route.params.lessonId": {
+    "$route.params.levelId": {
       immediate: true,
       handler(newVal) {
         const levelId = parseInt(newVal) || 1;
