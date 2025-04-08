@@ -284,10 +284,8 @@ export default {
 
 <style scoped>
 .typing-trainer {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: "Noto Sans", sans-serif;
+ 
+  padding: 20px 0;
 }
 
 .container {
