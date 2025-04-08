@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import GitHubButton from "./GitHubButton.vue";
+import GitHubButton from "../buttons/GitHubButton.vue";
 
 const currentYear = new Date().getFullYear();
 </script>

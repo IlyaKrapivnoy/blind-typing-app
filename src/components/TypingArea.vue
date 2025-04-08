@@ -85,7 +85,7 @@
 </template>
 
 <script>
-import CustomButton from "./partials/CustomButton.vue";
+import CustomButton from "./buttons/CustomButton.vue";
 
 export default {
   name: "TypingArea",
@@ -284,7 +284,7 @@ export default {
 
 <style scoped>
 .typing-trainer {
- 
+
   padding: 20px 0;
 }
 
