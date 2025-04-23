@@ -1,9 +1,14 @@
 <template>
   <div class="footer">
-    <p>
-      {{ currentYear }} © by ilya krapivnoy
-    </p>
-    <GitHubButton />
+    <p>{{ currentYear }} © by ilya krapivnoy</p>
+    <div class="buttons">
+      <GitHubButton />
+      <GitHubButton />
+      <font-awesome-icon
+        icon="address-card"
+        style="color: rgba(76, 175, 80, 0.5)"
+      />
+    </div>
   </div>
 </template>
 
@@ -24,5 +29,10 @@ const currentYear = new Date().getFullYear();
 
 .footer p {
   color: #8e8e8e;
+}
+
+.buttons {
+  display: flex;
+  gap: 30px;
 }
 </style>
