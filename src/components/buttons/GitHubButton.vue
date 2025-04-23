@@ -41,8 +41,8 @@ function openGitHub() {
   display: grid;
   place-items: center;
   background: #e3edf7;
-  padding: 10px;
-  border-radius: 10px;
+  padding: 6px;
+  border-radius: 6px;
   border: 1px solid rgba(0, 0, 0, 0);
   cursor: pointer;
   transition: transform 0.5s;
@@ -56,7 +56,8 @@ function openGitHub() {
 .btn svg,
 .icon {
   transition: transform 0.5s;
-  font-size: 40px;
+  font-size: 34px;
+  color: #386a3a;
 }
 
 .btn:hover svg,
