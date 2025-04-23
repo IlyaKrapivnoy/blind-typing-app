@@ -2,8 +2,14 @@
   <div class="footer">
     <p>{{ currentYear }} by ilya krapivnoy</p>
     <div class="buttons">
-      <GitHubButton :icon="['fas', 'circle-user']" />
-      <GitHubButton :icon="['fab', 'github']" />
+      <GitHubButton
+        :icon="['fas', 'circle-user']"
+        link="https://professional-card-one.vercel.app/"
+      />
+      <GitHubButton
+        :icon="['fab', 'github']"
+        link="https://github.com/IlyaKrapivnoy"
+      />
     </div>
   </div>
 </template>
