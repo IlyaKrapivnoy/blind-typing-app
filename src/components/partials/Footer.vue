@@ -5,14 +5,17 @@
       <AnimatedButton
         :icon="['fab', 'linkedin-in']"
         link="https://www.linkedin.com/in/ilya-krapivnoy/"
+        tooltip="LinkedIn"
       />
       <AnimatedButton
         :icon="['fab', 'github']"
         link="https://github.com/IlyaKrapivnoy"
+        tooltip="GitHub"
       />
       <AnimatedButton
         :icon="['fas', 'circle-user']"
         link="https://professional-card-one.vercel.app/"
+        tooltip="About Me"
       />
     </div>
   </div>
