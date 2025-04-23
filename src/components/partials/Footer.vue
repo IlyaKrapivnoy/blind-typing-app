@@ -2,11 +2,11 @@
   <div class="footer">
     <p>{{ currentYear }} by ilya krapivnoy</p>
     <div class="buttons">
-      <GitHubButton
+      <AnimatedButton
         :icon="['fas', 'circle-user']"
         link="https://professional-card-one.vercel.app/"
       />
-      <GitHubButton
+      <AnimatedButton
         :icon="['fab', 'github']"
         link="https://github.com/IlyaKrapivnoy"
       />
@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import GitHubButton from "../buttons/GitHubButton.vue";
+import AnimatedButton from "../buttons/AnimatedButton.vue";
 
 const currentYear = new Date().getFullYear();
 </script>
