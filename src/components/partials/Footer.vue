@@ -3,12 +3,16 @@
     <p>{{ currentYear }} by ilya krapivnoy</p>
     <div class="buttons">
       <AnimatedButton
-        :icon="['fas', 'circle-user']"
-        link="https://professional-card-one.vercel.app/"
+        :icon="['fab', 'linkedin-in']"
+        link="https://www.linkedin.com/in/ilya-krapivnoy/"
       />
       <AnimatedButton
         :icon="['fab', 'github']"
         link="https://github.com/IlyaKrapivnoy"
+      />
+      <AnimatedButton
+        :icon="['fas', 'circle-user']"
+        link="https://professional-card-one.vercel.app/"
       />
     </div>
   </div>
