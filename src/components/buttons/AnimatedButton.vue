@@ -1,11 +1,18 @@
 <template>
-  <button class="btn" @click="openLink" :aria-label="ariaLabel">
-    <font-awesome-icon v-if="icon" :icon="icon" class="icon" />
-  </button>
+  <div class="tooltip-wrapper">
+    <button class="btn" @click="openLink" :aria-label="ariaLabel" @mouseenter="show = true" @mouseleave="show = false">
+      <font-awesome-icon v-if="icon" :icon="icon" class="icon" />
+    </button>
+    <transition name="fade">
+      <div v-if="show && tooltip" class="tooltip">{{ tooltip }}</div>
+    </transition>
+  </div>
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+const show = ref(false);
 const props = defineProps({
   icon: {
     type: [String, Array],
@@ -20,6 +27,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: 'Visit Link'
+  },
+  tooltip: {
+    type: String,
+    required: false,
+    default: ''
   }
 });
 function openLink() {
@@ -30,6 +42,10 @@ function openLink() {
 </script>
 
 <style scoped>
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+}
 .btn {
   display: grid;
   place-items: center;
@@ -58,5 +74,27 @@ function openLink() {
   transform: scale(0.9) rotate(360deg);
   fill: #333333;
   color: #333333;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #222;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 5px;
+  white-space: nowrap;
+  font-size: 13px;
+  opacity: 0.95;
+  pointer-events: none;
+  z-index: 10;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.2s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
 </style>
