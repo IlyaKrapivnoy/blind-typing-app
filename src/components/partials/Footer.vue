@@ -1,13 +1,9 @@
 <template>
   <div class="footer">
-    <p>{{ currentYear }} © by ilya krapivnoy</p>
+    <p>{{ currentYear }} by ilya krapivnoy</p>
     <div class="buttons">
-      <GitHubButton />
-      <GitHubButton />
-      <font-awesome-icon
-        icon="address-card"
-        style="color: rgba(76, 175, 80, 0.5)"
-      />
+      <GitHubButton :icon="['fas', 'circle-user']" />
+      <GitHubButton :icon="['fab', 'github']" />
     </div>
   </div>
 </template>
