@@ -47,6 +47,6 @@ const currentYear = new Date().getFullYear();
 
 .buttons {
   display: flex;
-  gap: 30px;
+  gap: 20px;
 }
 </style>
