@@ -13,6 +13,11 @@
         tooltip="GitHub"
       />
       <AnimatedButton
+        :icon="['fas', 'book']"
+        link="https://you-know.fun/"
+        tooltip="Blog"
+      />
+      <AnimatedButton
         :icon="['fas', 'circle-user']"
         link="https://professional-card-one.vercel.app/"
         tooltip="About Me"
@@ -42,6 +47,6 @@ const currentYear = new Date().getFullYear();
 
 .buttons {
   display: flex;
-  gap: 30px;
+  gap: 20px;
 }
 </style>
